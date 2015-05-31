@@ -533,13 +533,24 @@
 
         case 9: // tab
         case 13: // enter
-
+          var notFoundFromSource=false;
           // We will handle creating tokens from autocomplete in autocomplete events
-          if (this.$input.data('ui-autocomplete') && this.$input.data('ui-autocomplete').menu.element.find("li:has(a.ui-state-focus), li.ui-state-focus").length) break
+          if (this.$input.data('ui-autocomplete')){
+            if( this.$input.data('ui-autocomplete').menu.element.find("li:has(a.ui-state-focus), li.ui-state-focus").length) break
 
+             notFoundFromSource=true;
+          } 
           // We will handle creating tokens from typeahead in typeahead events
-          if (this.$input.hasClass('tt-input') && this.$wrapper.find('.tt-cursor').length ) break
-          if (this.$input.hasClass('tt-input') && this.$wrapper.find('.tt-hint').val() && this.$wrapper.find('.tt-hint').val().length) break
+          if (this.$input.hasClass('tt-input')){
+            if (this.$wrapper.find('.tt-cursor').length ) break
+
+            if (this.$wrapper.find('.tt-hint').val() && this.$wrapper.find('.tt-hint').val().length) break
+
+            notFoundFromSource=true;
+          }
+
+          if (notFoundFromSource && this.options.onlyFromSource)
+            break;
 
           // Create token
           if (this.$input.is(document.activeElement) && this.$input.val().length || this.$input.data('edit')) {
