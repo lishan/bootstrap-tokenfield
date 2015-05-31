@@ -101,7 +101,7 @@
     if (this.textDirection === 'rtl') this.$wrapper.addClass('rtl')
 
     //Create a div for token (used for sortable)
-    this.$tokenblock=$('<div class="tokenblock"/>') .appendTo( this.$wrapper )
+    this.$tokendiv=$('<div class="tokendiv"/>') .appendTo( this.$wrapper )
 
     // Create a new input
     var id = this.$element.prop('id') || new Date().getTime() + '' + Math.floor((1 + Math.random()) * 100)
@@ -201,29 +201,29 @@
 	var self=this;
      //aply sortable on token div
     if (this.options.sortable && $.fn.sortable){ 
-        this.$tokenblock.sortable({ 
+        this.$tokendiv.sortable({ 
         	distance: 5, 
         	helper: 'clone',
-			start: function(event, ui) {
+			    start: function(event, ui) {
 	            var start_pos = ui.item.index();
 	            ui.item.data('start_pos', start_pos);
 	        },
-			update: function(event, ui) {
-            	var start_pos = ui.item.data('start_pos');
-            	var end_pos = ui.item.index();
+			    update: function(event, ui) {
+            var start_pos = ui.item.data('start_pos');
+            var end_pos = ui.item.index();
 
-            	//send sortevent
-            	var options = { attrs: self.getTokenData(ui.item), oldPosition: start_pos, newPosition: end_pos}
+            //send sortevent
+            var options = { attrs: self.getTokenData(ui.item), oldPosition: start_pos, newPosition: end_pos}
       			var sortEvent = $.Event('tokenfield:sorttoken', options)
       			self.$element.trigger( sortEvent )
 
-				if (sortEvent.isDefaultPrevented()){
-					$(this).sortable('cancel')
+				    if (sortEvent.isDefaultPrevented()){
+					      $(this).sortable('cancel')
       			  	return
-				}
+				    }
 
-				//send sorted event
-				var sortedEvent = $.Event('tokenfield:sortedtoken', options)
+				    //send sorted event
+				    var sortedEvent = $.Event('tokenfield:sortedtoken', options)
       			self.$element.trigger( sortedEvent )
         	}
     	});
@@ -234,7 +234,7 @@
 
     constructor: Tokenfield
 
-  , createToken: function (attrs, triggerChange, fromSelection ) {
+  , createToken: function (attrs, triggerChange, fromSelection) {
       var _self = this
 
       if (typeof attrs === 'string') {
@@ -253,17 +253,17 @@
       }
 
       // Normalize label and value
-      attrs.value = $.trim(attrs.value.toString());
-      attrs.label = attrs.label && attrs.label.length ? $.trim(attrs.label) : attrs.value
+      attrs.value = (typeof attrs.value === 'string')?  $.trim(attrs.value) : attrs.value;
+      attrs.label = attrs.label && attrs.label.length ? $.trim(attrs.label) : $.trim(attrs.value.toString())
 
       // Bail out if has no value or label, or label is too short
-      if (!attrs.value.length || !attrs.label.length || attrs.label.length <= this.options.minLength) return
+      if (!attrs.value || !attrs.label.length || attrs.label.length <= this.options.minLength) return
 
       // Bail out if maximum number of tokens is reached
       if (this.options.limit && this.getTokens().length >= this.options.limit) return
 
       // Allow changing token data before creating it
-      var createEvent = $.Event('tokenfield:createtoken', { attrs: attrs, fromSelection: fromSelection })
+      var createEvent = $.Event('tokenfield:createtoken', { attrs: attrs, fromSelection: fromSelection  })
       this.$element.trigger(createEvent)
 
       // Bail out if there if attributes are empty or event was defaultPrevented
@@ -276,9 +276,9 @@
 
      //Check if the input is inside the label block (edit of a label)
      //if so insert token before input otherwise insert as last element
-     //of the tokenblock div
-      var notnulleditingtag = this.$input.parents('.tokenblock')
-      if (notnulleditingtag.length && notnulleditingtag[0]===this.$tokenblock[0]){
+     //of the tokendiv div
+      var notnulleditingtag = this.$input.parents('.tokendiv')
+      if (notnulleditingtag.length && notnulleditingtag[0]===this.$tokendiv[0]){
           if (this.$input.hasClass('tt-input')) {
         // If the input has typeahead e$tokenblnabled, insert token before it's parent
           this.$input.parent().before( $token )
@@ -286,7 +286,7 @@
           this.$input.before( $token )
         }
       }
-      else  $token.appendTo(this.$tokenblock)
+      else  $token.appendTo(this.$tokendiv)
 
       // Temporarily set input width to minimum
       this.$input.css('width', this.options.minWidth + 'px')
@@ -347,7 +347,7 @@
       // indicating that the token is now in the DOM
       this.$element.trigger($.Event('tokenfield:createdtoken', {
         attrs: attrs,
-        fromSelection: fromSelection,
+        fromSelection: fromSelection ,
         relatedTarget: $token.get(0)
       }))
 
@@ -479,7 +479,7 @@
           $_menuElement.css( 'min-width', minWidth + 'px' )
         })
         .on('autocompleteselect', function (e, ui) {
-          if (_self.createToken( ui.item,true,true )) {
+          if (_self.createToken( ui.item,true,true  )) {
             _self.$input.val('')
             if (_self.$input.data( 'edit' )) {
               _self.unedit(true)
@@ -538,13 +538,24 @@
 
         case 9: // tab
         case 13: // enter
-
+          var notFoundFromSource=false;
           // We will handle creating tokens from autocomplete in autocomplete events
-          if (this.$input.data('ui-autocomplete') && this.$input.data('ui-autocomplete').menu.element.find("li:has(a.ui-state-focus), li.ui-state-focus").length) break
+          if (this.$input.data('ui-autocomplete')){
+            if( this.$input.data('ui-autocomplete').menu.element.find("li:has(a.ui-state-focus), li.ui-state-focus").length) break
 
+             notFoundFromSource=true;
+          } 
           // We will handle creating tokens from typeahead in typeahead events
-          if (this.$input.hasClass('tt-input') && this.$wrapper.find('.tt-cursor').length ) break
-          if (this.$input.hasClass('tt-input') && this.$wrapper.find('.tt-hint').val() && this.$wrapper.find('.tt-hint').val().length) break
+          if (this.$input.hasClass('tt-input')){
+            if (this.$wrapper.find('.tt-cursor').length ) break
+
+            if (this.$wrapper.find('.tt-hint').val() && this.$wrapper.find('.tt-hint').val().length) break
+
+            notFoundFromSource=true;
+          }
+
+          if (notFoundFromSource && this.options.onlyFromSource)
+            break;
 
           // Create token
           if (this.$input.is(document.activeElement) && this.$input.val().length || this.$input.data('edit')) {
@@ -564,10 +575,10 @@
           if (_self.$input.val().length > 0) return
 
           direction += 'All'
-          var $tokenblock = _self.$input.hasClass('tt-input') ? _self.$input.parent()[direction]('.tokenblock') : _self.$input[direction]('.tokenblock')
-          if (!$tokenblock.length) return
+          var $tokendiv = _self.$input.hasClass('tt-input') ? _self.$input.parent()[direction]('.tokendiv') : _self.$input[direction]('.tokendiv')
+          if (!$tokendiv.length) return
 
-          var $token = _self.$tokenblock.find('.token:'+ (direction==='prevAll'? 'last':'first')) 
+          var $token = _self.$tokendiv.find('.token:'+ (direction==='prevAll'? 'last':'first')) 
 
           if (!$token.length) return
 
@@ -590,10 +601,10 @@
           if (_self.$input.val().length > 0) return
 
 	      direction += 'All'
-          var $tokenblock = _self.$input.hasClass('tt-input') ? _self.$input.parent()[direction]('.tokenblock') : _self.$input[direction]('.tokenblock')
-          if (!$tokenblock.length) return
+          var $tokendiv = _self.$input.hasClass('tt-input') ? _self.$input.parent()[direction]('.tokendiv') : _self.$input[direction]('.tokendiv')
+          if (!$tokendiv.length) return
 
-          var $token = _self.$tokenblock.find('.token:'+ (direction==='prevAll'? 'last':'first')) 
+          var $token = _self.$tokendiv.find('.token:'+ (direction==='prevAll'? 'last':'first')) 
           if (!$token.length) return
 
 
@@ -607,7 +618,7 @@
           _self.deactivate( $(this) )
         })
 
-        _self.activate( _self.$tokenblock.find('.token:' + position), true, true )
+        _self.activate( _self.$tokendiv.find('.token:' + position), true, true )
         e.preventDefault()
       }
 
@@ -637,7 +648,7 @@
 
             this.preventDeactivation = true
             //var $prevToken = this.$input.hasClass('tt-input') ? this.$input.parent().prevAll('.token:first') : this.$input.prevAll('.token:first')
-			var $prevToken = this.$tokenblock.find('.token:last')
+			var $prevToken = this.$tokendiv.find('.token:last')
 
             if (!$prevToken.length) break
 
@@ -790,7 +801,7 @@
           , a = $token.index()
           , _self = this
 
-        this.$tokenblock.find('.token').slice( Math.min(i, a) + 1, Math.max(i, a) ).each( function() {
+        this.$tokendiv.find('.token').slice( Math.min(i, a) + 1, Math.max(i, a) ).each( function() {
           _self.activate( $(this), true )
         })
       }
