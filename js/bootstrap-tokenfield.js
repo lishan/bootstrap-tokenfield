@@ -854,7 +854,7 @@
 
       this.preventCreateTokens = true
 
-      this.$input.val( attrs.value )
+      this.$input.val( attrs.label )
                 .select()
                 .data( 'edit', true )
                 .width( tokenWidth )
