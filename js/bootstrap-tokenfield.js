@@ -234,7 +234,7 @@
 
     constructor: Tokenfield
 
-  , createToken: function (attrs, triggerChange, fromSelection) {
+  , createToken: function (attrs, triggerChange) {
       var _self = this
 
       if (typeof attrs === 'string') {
@@ -248,22 +248,18 @@
          triggerChange = true
       }
 
-      if (typeof fromSelection === 'undefined') {
-         fromSelection = false
-      }
-
       // Normalize label and value
-      attrs.value = (typeof attrs.value === 'string')?  $.trim(attrs.value) : attrs.value;
-      attrs.label = attrs.label && attrs.label.length ? $.trim(attrs.label) : $.trim(attrs.value.toString())
+      attrs.value = $.trim(attrs.value.toString());
+      attrs.label = attrs.label && attrs.label.length ? $.trim(attrs.label) : attrs.value
 
       // Bail out if has no value or label, or label is too short
-      if (!attrs.value || !attrs.label.length || attrs.label.length <= this.options.minLength) return
+      if (!attrs.value.length || !attrs.label.length || attrs.label.length <= this.options.minLength) return
 
       // Bail out if maximum number of tokens is reached
       if (this.options.limit && this.getTokens().length >= this.options.limit) return
 
       // Allow changing token data before creating it
-      var createEvent = $.Event('tokenfield:createtoken', { attrs: attrs, fromSelection: fromSelection  })
+      var createEvent = $.Event('tokenfield:createtoken', { attrs: attrs })
       this.$element.trigger(createEvent)
 
       // Bail out if there if attributes are empty or event was defaultPrevented
@@ -347,7 +343,6 @@
       // indicating that the token is now in the DOM
       this.$element.trigger($.Event('tokenfield:createdtoken', {
         attrs: attrs,
-        fromSelection: fromSelection ,
         relatedTarget: $token.get(0)
       }))
 
@@ -421,7 +416,7 @@
 
       var separator = delimiter + ( beautify && delimiter !== ' ' ? ' ' : '')
       return $.map( this.getTokens(active), function (token) {
-        return token.value
+        return token.label
       }).join(separator)
   }
 
@@ -479,7 +474,7 @@
           $_menuElement.css( 'min-width', minWidth + 'px' )
         })
         .on('autocompleteselect', function (e, ui) {
-          if (_self.createToken( ui.item,true,true  )) {
+          if (_self.createToken( ui.item )) {
             _self.$input.val('')
             if (_self.$input.data( 'edit' )) {
               _self.unedit(true)
@@ -489,7 +484,7 @@
         })
         .on('typeahead:selected typeahead:autocompleted', function (e, datum, dataset) {
           // Create token
-          if (_self.createToken( datum,true,true )) {
+          if (_self.createToken( datum )) {
             _self.$input.typeahead('val', '')
             if (_self.$input.data( 'edit' )) {
               _self.unedit(true)
@@ -538,24 +533,13 @@
 
         case 9: // tab
         case 13: // enter
-          var notFoundFromSource=false;
+
           // We will handle creating tokens from autocomplete in autocomplete events
-          if (this.$input.data('ui-autocomplete')){
-            if( this.$input.data('ui-autocomplete').menu.element.find("li:has(a.ui-state-focus), li.ui-state-focus").length) break
+          if (this.$input.data('ui-autocomplete') && this.$input.data('ui-autocomplete').menu.element.find("li:has(a.ui-state-focus), li.ui-state-focus").length) break
 
-             notFoundFromSource=true;
-          } 
           // We will handle creating tokens from typeahead in typeahead events
-          if (this.$input.hasClass('tt-input')){
-            if (this.$wrapper.find('.tt-cursor').length ) break
-
-            if (this.$wrapper.find('.tt-hint').val() && this.$wrapper.find('.tt-hint').val().length) break
-
-            notFoundFromSource=true;
-          }
-
-          if (notFoundFromSource && this.options.onlyFromSource)
-            break;
+          if (this.$input.hasClass('tt-input') && this.$wrapper.find('.tt-cursor').length ) break
+          if (this.$input.hasClass('tt-input') && this.$wrapper.find('.tt-hint').val() && this.$wrapper.find('.tt-hint').val().length) break
 
           // Create token
           if (this.$input.is(document.activeElement) && this.$input.val().length || this.$input.data('edit')) {
@@ -854,7 +838,7 @@
 
       this.preventCreateTokens = true
 
-      this.$input.val( attrs.label )
+      this.$input.val( attrs.value )
                 .select()
                 .data( 'edit', true )
                 .width( tokenWidth )

@@ -139,7 +139,7 @@ describe('1. Unit tests:', function() {
         });
 
         it('add the new token value to original input', function() {
-          this.$field.val().must.equal('purple');
+          this.$field.val().must.equal('Violet');
         });
 
       });
@@ -350,7 +350,7 @@ describe('1. Unit tests:', function() {
         });
 
         it('must set the original input value to comma-separated list of token values', function() {
-          this.$field.val().must.equal('black, yellow');
+          this.$field.val().must.equal('Schwarz, Gelb');
         });      
 
       });
