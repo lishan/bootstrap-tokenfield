@@ -253,8 +253,8 @@
       }
 
       // Normalize label and value
-      attrs.value = $.trim(attrs.value.toString());
-      attrs.label = attrs.label && attrs.label.length ? $.trim(attrs.label) : attrs.value
+      attrs.value = (typeof attrs.value === 'string')?  $.trim(attrs.value.toString()) : attrs.value;
+      attrs.label = attrs.label && attrs.label.length ? $.trim(attrs.label) : $.trim(attrs.value.toString())
 
       // Bail out if has no value or label, or label is too short
       if (!attrs.value.length || !attrs.label.length || attrs.label.length <= this.options.minLength) return
