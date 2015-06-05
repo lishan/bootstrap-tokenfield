@@ -257,7 +257,7 @@
       attrs.label = attrs.label && attrs.label.length ? $.trim(attrs.label) : $.trim(attrs.value.toString())
 
       // Bail out if has no value or label, or label is too short
-      if (!attrs.value.length || !attrs.label.length || attrs.label.length <= this.options.minLength) return
+      if (!attrs.value || !attrs.label.length || attrs.label.length <= this.options.minLength) return
 
       // Bail out if maximum number of tokens is reached
       if (this.options.limit && this.getTokens().length >= this.options.limit) return
