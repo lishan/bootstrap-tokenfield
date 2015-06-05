@@ -234,7 +234,7 @@
 
     constructor: Tokenfield
 
-  , createToken: function (attrs, triggerChange) {
+  , createToken: function (attrs, triggerChange, fromSelection) {
       var _self = this
 
       if (typeof attrs === 'string') {
@@ -248,6 +248,10 @@
          triggerChange = true
       }
 
+      if (typeof fromSelection === 'undefined') {
+         fromSelection = false
+      }
+
       // Normalize label and value
       attrs.value = $.trim(attrs.value.toString());
       attrs.label = attrs.label && attrs.label.length ? $.trim(attrs.label) : attrs.value
@@ -259,7 +263,7 @@
       if (this.options.limit && this.getTokens().length >= this.options.limit) return
 
       // Allow changing token data before creating it
-      var createEvent = $.Event('tokenfield:createtoken', { attrs: attrs })
+      var createEvent = $.Event('tokenfield:createtoken', { attrs: attrs, fromSelection: fromSelection })
       this.$element.trigger(createEvent)
 
       // Bail out if there if attributes are empty or event was defaultPrevented
@@ -343,6 +347,7 @@
       // indicating that the token is now in the DOM
       this.$element.trigger($.Event('tokenfield:createdtoken', {
         attrs: attrs,
+        fromSelection: fromSelection,
         relatedTarget: $token.get(0)
       }))
 
@@ -474,7 +479,7 @@
           $_menuElement.css( 'min-width', minWidth + 'px' )
         })
         .on('autocompleteselect', function (e, ui) {
-          if (_self.createToken( ui.item )) {
+          if (_self.createToken( ui.item,true,true )) {
             _self.$input.val('')
             if (_self.$input.data( 'edit' )) {
               _self.unedit(true)
@@ -484,7 +489,7 @@
         })
         .on('typeahead:selected typeahead:autocompleted', function (e, datum, dataset) {
           // Create token
-          if (_self.createToken( datum )) {
+          if (_self.createToken( datum,true,true)) {
             _self.$input.typeahead('val', '')
             if (_self.$input.data( 'edit' )) {
               _self.unedit(true)
@@ -534,12 +539,23 @@
         case 9: // tab
         case 13: // enter
 
+          var notFoundFromSource=false;
           // We will handle creating tokens from autocomplete in autocomplete events
-          if (this.$input.data('ui-autocomplete') && this.$input.data('ui-autocomplete').menu.element.find("li:has(a.ui-state-focus), li.ui-state-focus").length) break
+          if (this.$input.data('ui-autocomplete')){
+            if (this.$input.data('ui-autocomplete').menu.element.find("li:has(a.ui-state-focus), li.ui-state-focus").length) break
 
+            notFoundFromSource=true;
+          }
           // We will handle creating tokens from typeahead in typeahead events
-          if (this.$input.hasClass('tt-input') && this.$wrapper.find('.tt-cursor').length ) break
-          if (this.$input.hasClass('tt-input') && this.$wrapper.find('.tt-hint').val() && this.$wrapper.find('.tt-hint').val().length) break
+          if (this.$input.hasClass('tt-input')){
+            if (this.$wrapper.find('.tt-cursor').length ) break
+            if (this.$wrapper.find('.tt-hint').val() && this.$wrapper.find('.tt-hint').val().length) break
+
+            notFoundFromSource=true;
+          }
+
+          if (notFoundFromSource && this.options.onlyFromSource)
+            break;
 
           // Create token
           if (this.$input.is(document.activeElement) && this.$input.val().length || this.$input.data('edit')) {
