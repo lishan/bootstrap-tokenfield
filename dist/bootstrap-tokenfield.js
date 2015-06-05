@@ -829,7 +829,7 @@
       // Edit event can be cancelled if default is prevented
       if (editEvent.isDefaultPrevented()) return
 
-      $token.find('.token-label').text(attrs.value)
+      //$token.find('.token-label').text(attrs.value)
       var tokenWidth = $token.outerWidth()
 
       var $_input = this.$input.hasClass('tt-input') ? this.$input.parent() : this.$input
@@ -838,7 +838,7 @@
 
       this.preventCreateTokens = true
 
-      this.$input.val( attrs.value )
+      this.$input.val( attrs.label )
                 .select()
                 .data( 'edit', true )
                 .width( tokenWidth )
