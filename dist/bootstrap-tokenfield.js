@@ -225,6 +225,8 @@
 				    //send sorted event
 				    var sortedEvent = $.Event('tokenfield:sortedtoken', options)
       			self.$element.trigger( sortedEvent )
+
+            self.$element.val( self.getTokensList() ).trigger( $.Event('change', { initiator: 'tokenfield' }) )
         	}
     	});
     }
