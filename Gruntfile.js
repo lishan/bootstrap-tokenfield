@@ -89,7 +89,7 @@ module.exports = function (grunt) {
       },
       livereload: {
         options: { livereload: true },
-        files: ['dist/**/*'],
+        files: ['dist/**/*']
       }
     },
 
@@ -197,4 +197,4 @@ module.exports = function (grunt) {
 
   // Build task
   grunt.registerTask('build', ['copy', 'uglify', 'less']);
-}
+};

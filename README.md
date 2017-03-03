@@ -9,6 +9,20 @@ A jQuery tagging / tokenizer input plugin for Twitter's Bootstrap, by the guys f
 
 Check out the [demo and docs](http://sliptree.github.io/bootstrap-tokenfield/)
 
+### Notification
+
+This fork version in my repository is maintained by myself.
+
+0.12.2
+
+* Add functions that tags can sortable or in another word, it can be draggable to reorder
+* Tags can be copied and pasted, use `ctrl` to choose multiple tags
+* TODO: Support auto complete functions for input block 
+
+### Installation bia bower
+
+Use `bower install bootstrap-tokenfield-ocsp` to install this fork for you.
+
 ### Installation
 
 Requirements: jQuery 1.9+, Bootstrap 3+ (only CSS)
@@ -56,7 +70,7 @@ data. This example checks if the given token already exists and stops its entry 
 
 ```js
 $('#my-tokenfield').on('tokenfield:createtoken', function (event) {
-	var available_tokens = bloodhound_tokens.index.datums
+	var available_tokens = bloodhound_tokens.index.datums;
 	var exists = true;
 	$.each(available_tokens, function(index, token) {
 		if (token.value === event.attrs.value)

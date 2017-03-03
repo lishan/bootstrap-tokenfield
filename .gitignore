@@ -5,3 +5,4 @@
 *.tgz
 *.sublime-project
 *.sublime-workspace
+.idea/
